@@ -50,6 +50,9 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
                 return Task.CompletedTask;
             });
 
+            mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((int id) => leaveTypes.First(lt => lt.Id == id));
+
             return mockRepo;
     }
 }
