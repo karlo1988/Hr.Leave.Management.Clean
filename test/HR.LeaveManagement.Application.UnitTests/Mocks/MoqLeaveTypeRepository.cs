@@ -41,11 +41,17 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
 
             var mockRepo = new Mock<ILeaveTypeRepository>();
 
+             // Arrange
+            mockRepo.Setup(r => r.IsLeaveTypeNameUnique(It.IsAny<string>()))
+             .ReturnsAsync(true);
+
             mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(leaveTypes);
 
             mockRepo.Setup(r => r.AddAsync(It.IsAny<Leave.Management.Domain.LeaveType>()))
             .Returns((Leave.Management.Domain.LeaveType leaveType) =>
             {
+                var id = leaveTypes.Max(lt => lt.Id) + 1;
+                leaveType.Id = id;
                 leaveTypes.Add(leaveType);                
                 return Task.CompletedTask;
             });
