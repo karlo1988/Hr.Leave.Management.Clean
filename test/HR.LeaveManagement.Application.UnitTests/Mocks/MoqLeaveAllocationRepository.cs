@@ -47,7 +47,10 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
              // Arrange
 
 
-            mockRepo.Setup(r => r.GetLeaveAllocationsWithDetails()).ReturnsAsync(leaveAllocations);
+            mockRepo.Setup(r => r.GetLeaveAllocationsWithDetails()).ReturnsAsync(leaveAllocations);            
+
+            mockRepo.Setup(r => r.GetLeaveAllocationWithDetails(It.IsAny<int>()))
+                .ReturnsAsync((int id) => leaveAllocations.First(lt => lt.Id == id));
 
             mockRepo.Setup(r => r.AddAsync(It.IsAny<Leave.Management.Domain.LeaveAllocation>()))
             .Returns((Leave.Management.Domain.LeaveAllocation leaveAllocation) =>

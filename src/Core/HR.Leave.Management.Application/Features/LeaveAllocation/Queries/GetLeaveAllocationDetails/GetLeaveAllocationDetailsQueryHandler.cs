@@ -10,7 +10,7 @@ public class GetLeaveAllocationDetailsQueryHandler : IRequestHandler<GetLeaveAll
     private readonly ILeaveAllocationRepository _leaveAllocationRepository;
     private readonly IMapper _mapper;
 
-    public GetLeaveAllocationDetailsQueryHandler(ILeaveAllocationRepository leaveAllocationRepository, IMapper mapper)
+    public GetLeaveAllocationDetailsQueryHandler(ILeaveAllocationRepository leaveAllocationRepository, IMapper mapper, Contracts.Logging.IAppLogger<GetLeaveAllocationDetailsQueryHandler> @object)
     {
         _leaveAllocationRepository = leaveAllocationRepository;
         _mapper = mapper;
