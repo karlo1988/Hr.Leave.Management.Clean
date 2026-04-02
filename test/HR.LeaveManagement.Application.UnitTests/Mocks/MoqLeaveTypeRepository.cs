@@ -45,6 +45,9 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
             mockRepo.Setup(r => r.IsLeaveTypeNameUnique(It.IsAny<string>()))
              .ReturnsAsync(true);
 
+            mockRepo.Setup(r => r.LeaveTypeExists(It.IsAny<int>()))
+             .ReturnsAsync(true);
+
             mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(leaveTypes);
 
             mockRepo.Setup(r => r.AddAsync(It.IsAny<Leave.Management.Domain.LeaveType>()))
@@ -55,6 +58,17 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
                 leaveTypes.Add(leaveType);                
                 return Task.CompletedTask;
             });
+
+            mockRepo.Setup(r => r.UpdateAsync(It.IsAny<Leave.Management.Domain.LeaveType>()))
+            .Returns((Leave.Management.Domain.LeaveType leaveType) =>
+            {
+                var existingLeaveType = leaveTypes.First(lt => lt.Id == leaveType.Id);
+                existingLeaveType.Name = leaveType.Name;
+                existingLeaveType.DefaultDays = leaveType.DefaultDays;
+                existingLeaveType.ModifiedDate = DateTime.Now;
+                return Task.CompletedTask;
+            });
+
 
             mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((int id) => leaveTypes.First(lt => lt.Id == id));
