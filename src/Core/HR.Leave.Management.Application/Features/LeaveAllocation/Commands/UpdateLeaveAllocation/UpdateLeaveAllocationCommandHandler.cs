@@ -13,8 +13,8 @@ public class UpdateLeaveAllocationCommandHandler : IRequestHandler<UpdateLeaveAl
     private readonly ILeaveTypeRepository _leaveTypeRepository;
     private readonly IAppLogger<UpdateLeaveAllocationCommandHandler> _logger;
 
-    public UpdateLeaveAllocationCommandHandler(IMapper mapper, ILeaveAllocationRepository leaveAllocationRepository,
-        ILeaveTypeRepository leaveTypeRepository, IAppLogger<UpdateLeaveAllocationCommandHandler> logger)
+    public UpdateLeaveAllocationCommandHandler(ILeaveAllocationRepository leaveAllocationRepository,
+        ILeaveTypeRepository leaveTypeRepository, IMapper mapper, IAppLogger<UpdateLeaveAllocationCommandHandler> logger)
     {
         _mapper = mapper;
         _leaveAllocationRepository = leaveAllocationRepository;
