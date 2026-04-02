@@ -10,7 +10,7 @@ public class DeleteLeaveAllocationCommandHandler : IRequestHandler<DeleteLeaveAl
     private readonly ILeaveAllocationRepository _leaveAllocationRepository;
     private readonly IAppLogger<DeleteLeaveAllocationCommandHandler> _logger;
 
-    public DeleteLeaveAllocationCommandHandler(ILeaveAllocationRepository leaveAllocationRepository,
+    public DeleteLeaveAllocationCommandHandler(ILeaveAllocationRepository leaveAllocationRepository,        
         IAppLogger<DeleteLeaveAllocationCommandHandler> logger)
     {
         _leaveAllocationRepository = leaveAllocationRepository;
