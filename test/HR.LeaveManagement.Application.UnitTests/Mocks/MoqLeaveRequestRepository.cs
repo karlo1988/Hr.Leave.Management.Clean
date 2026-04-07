@@ -9,7 +9,7 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
 {
     public class MoqLeaveRequestRepository
     {
-       public static Mock<ILeaveRequestRepository> GetLeaveRequestMoqRepository()
+        public static Mock<ILeaveRequestRepository> GetLeaveRequestMoqRepository()
         {
             var leaveRequests = new List<Leave.Management.Domain.LeaveRequest>
             {
@@ -59,8 +59,12 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
 
             var mockRepo = new Mock<ILeaveRequestRepository>();
 
-             // Arrange
+            // Arrange
             mockRepo.Setup(repo => repo.GetLeaveRequestsWithDetails()).ReturnsAsync(leaveRequests);
+            mockRepo.Setup(repo => repo.GetLeaveRequestWithDetails(It.IsAny<int>())).ReturnsAsync((int id) =>
+            {
+                return leaveRequests.First(lr => lr.Id == id);
+            });
 
             return mockRepo;
         }
