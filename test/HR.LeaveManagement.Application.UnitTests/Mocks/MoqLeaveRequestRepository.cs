@@ -66,6 +66,39 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
                 return leaveRequests.First(lr => lr.Id == id);
             });
 
+            mockRepo.Setup(repo => repo.GetByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((int id) => leaveRequests.FirstOrDefault(lr => lr.Id == id));
+
+            mockRepo.Setup(repo => repo.AddAsync(It.IsAny<Leave.Management.Domain.LeaveRequest>()))
+                .Returns((Leave.Management.Domain.LeaveRequest leaveRequest) =>
+                {
+                    var id = leaveRequests.Max(lr => lr.Id) + 1;
+                    leaveRequest.Id = id;
+                    leaveRequests.Add(leaveRequest);
+                    return Task.CompletedTask;
+                });
+
+            mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<Leave.Management.Domain.LeaveRequest>()))
+                .Returns((Leave.Management.Domain.LeaveRequest leaveRequest) =>
+                {
+                    var existing = leaveRequests.First(lr => lr.Id == leaveRequest.Id);
+                    existing.StartDate = leaveRequest.StartDate;
+                    existing.EndDate = leaveRequest.EndDate;
+                    existing.LeaveTypeId = leaveRequest.LeaveTypeId;
+                    existing.RequestComments = leaveRequest.RequestComments;
+                    existing.Approved = leaveRequest.Approved;
+                    existing.Cancelled = leaveRequest.Cancelled;
+                    existing.ModifiedDate = DateTime.Now;
+                    return Task.CompletedTask;
+                });
+
+            mockRepo.Setup(repo => repo.DeleteAsync(It.IsAny<Leave.Management.Domain.LeaveRequest>()))
+                .Returns((Leave.Management.Domain.LeaveRequest leaveRequest) =>
+                {
+                    leaveRequests.Remove(leaveRequest);
+                    return Task.CompletedTask;
+                });
+
             return mockRepo;
         }
     }
