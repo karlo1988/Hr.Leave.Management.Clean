@@ -4,6 +4,7 @@ using HR.LeaveManagement.BlazorUI;
 using HR.LeaveManagement.BlazorUI.Services.Base;
 using HR.LeaveManagement.BlazorUI.Contracts;
 using HR.LeaveManagement.BlazorUI.Services;
+using System.Reflection;
 
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -17,5 +18,7 @@ builder.Services.AddHttpClient<IClient, Client>(client => client.BaseAddress = n
 builder.Services.AddScoped<ILeaveRequestService, LeaveRequestService>();
 builder.Services.AddScoped<ILeaveTypeService, LeaveTypeService>();
 builder.Services.AddScoped<ILeaveAllocationService, LeaveAllocationService>();
+
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
 
 await builder.Build().RunAsync();
