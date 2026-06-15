@@ -1,0 +1,25 @@
+@page "/leavetypes/details/{id:int}"
+
+<h3>Leave Type Details</h3>
+
+@if (LeaveType == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label class="form-label fw-bold">Name</label>
+        <p class="form-control-plaintext">@LeaveType.Name</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Default Number of Days</label>
+        <p class="form-control-plaintext">@LeaveType.DefaultDays</p>
+    </div>
+
+    <div class="m-2 d-flex justify-content-end gap-2">
+        <a href="/leavetypes" class="btn btn-secondary">Back</a>
+        <a href="/leavetypes/edit/@LeaveType.Id" class="btn btn-primary">Edit</a>
+    </div>
+}

@@ -29,8 +29,9 @@ namespace HR.LeaveManagement.BlazorUI.Pages.LeaveTypes
         {
             var response = await LeaveTypeService.DeleteLeaveType(id);
             if (response.Success)
-            {                
-                StateHasChanged();                
+            {
+                LeaveTypes = await LeaveTypeService.GetLeaveTypes();
+                StateHasChanged();
             }
             else
             {
@@ -45,7 +46,7 @@ namespace HR.LeaveManagement.BlazorUI.Pages.LeaveTypes
 
         public void AllocateLeaveType(int id)
         {
-            //Navigation.NavigateTo($"/leavetypes/allocate/{id}");
+            Navigation.NavigateTo($"/leavetypes/allocate/{id}");
         }
 
         protected override async Task OnInitializedAsync()

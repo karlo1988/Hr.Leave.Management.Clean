@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace HR.LeaveManagement.BlazorUI.Pages.LeaveTypes
 {
-    public partial class Create
+    public partial class Edit
     {
         [Inject]
         private NavigationManager Navigation { get; set; }
@@ -12,25 +12,28 @@ namespace HR.LeaveManagement.BlazorUI.Pages.LeaveTypes
         [Inject]
         private ILeaveTypeService LeaveTypeService { get; set; }
 
-        public LeaveTypeVM LeaveType { get; set; } = new LeaveTypeVM();
+        [Parameter]
+        public int Id { get; set; }
+
+        public LeaveTypeVM LeaveType { get; set; }
         public string Message { get; set; } = string.Empty;
 
-        public async Task CreateLeaveType()
+        public async Task UpdateLeaveType()
         {
-            var response = await LeaveTypeService.CreateLeaveType(LeaveType);
+            var response = await LeaveTypeService.UpdateLeaveType(Id, LeaveType);
             if (response.Success)
             {
                 Navigation.NavigateTo("/leavetypes");
             }
             else
             {
-                Message = $"Error creating Leave Type: {response.Message} {response.ValidationErrors}";
+                Message = $"Error updating Leave Type: {response.Message} { response.ValidationErrors}";
             }
         }
 
         protected override async Task OnInitializedAsync()
         {
-            LeaveType = new LeaveTypeVM();
+            LeaveType = await LeaveTypeService.GetLeaveTypeDetails(Id);
         }
     }
 }

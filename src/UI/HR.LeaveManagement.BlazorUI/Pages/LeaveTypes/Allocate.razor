@@ -1,0 +1,30 @@
+@page "/leavetypes/allocate/{id:int}"
+
+<h3>Allocate Leave Type</h3>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-danger">@Message</div>
+}
+
+@if (LeaveType == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label class="form-label fw-bold">Leave Type</label>
+        <p class="form-control-plaintext">@LeaveType.Name</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Default Number of Days</label>
+        <p class="form-control-plaintext">@LeaveType.DefaultDays</p>
+    </div>
+
+    <div class="m-2 d-flex justify-content-end gap-2">
+        <a href="/leavetypes" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-warning" @onclick="AllocateLeaveType">Allocate to All Employees</button>
+    </div>
+}
