@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using HR.Leave.Management.Application.Contracts.Identity;
 using HR.Leave.Management.Application.Exceptions;
 using HR.Leave.Management.Application.Models.Identity;
 using HR.LeaveManagement.Identity.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HR.LeaveManagement.Identity.Services
 {
@@ -37,17 +41,80 @@ namespace HR.LeaveManagement.Identity.Services
                 throw new BadRequestException($"Credentials for '{request.Email}' are not valid.");
             }
 
-            return new AuthResponse
+            JwtSecurityToken jwtSecurityToken = await GenerateToken(user);
+
+            var response = new AuthResponse
             {
                 Id = user.Id,
-                UserName = user.UserName,
+                Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
                 Email = user.Email,
+                UserName = user.UserName
             };
+
+            return response;
         }
 
-        public Task<RegistrationResponse> RegisterAsync(RegistrationRequest request)
+        public async Task<RegistrationResponse> RegisterAsync(RegistrationRequest request)
         {
-            throw new NotImplementedException();
+            var user = new ApplicationUser
+            {
+                Email = request.Email,
+                UserName = request.UserName,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                EmailConfirmed = true
+            };
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+
+            if(result.Succeeded)
+            {
+                await  _userManager.AddToRoleAsync(user, "Employee");
+                return new RegistrationResponse { UserId = user.Id };
+            }
+            else
+            {
+                StringBuilder errors = new StringBuilder();
+                foreach (var error in result.Errors)
+                {
+                    errors.AppendFormat("*{0}\n", error.Description);
+                }
+                throw new BadRequestException($"{errors}");
+            }
         }
+
+        private async Task<JwtSecurityToken> GenerateToken(ApplicationUser user)
+        {
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            var roleClaims = roles.Select(r => new Claim(ClaimTypes.Role, r)).ToList();
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim("uid", user.Id)
+            }
+            .Union(userClaims)
+            .Union(roleClaims);
+
+            var symmetricSecurityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_jwtSettings.Key));
+
+            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+
+            var jwtSecurityToken = new JwtSecurityToken(
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(_jwtSettings.DurationInMinutes),
+                signingCredentials: signingCredentials
+            );
+
+            return jwtSecurityToken;
+        }
+
+        
     }
 }
