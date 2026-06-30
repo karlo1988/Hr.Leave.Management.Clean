@@ -1,5 +1,4 @@
 using HR.LeaveManagement.Identity.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR.LeaveManagement.Identity.Configurations
@@ -8,8 +7,6 @@ namespace HR.LeaveManagement.Identity.Configurations
     {
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<ApplicationUser> builder)
         {
-
-            var hasher = new PasswordHasher<ApplicationUser>();
             builder.HasData(
                 new ApplicationUser
                 {
@@ -20,8 +17,10 @@ namespace HR.LeaveManagement.Identity.Configurations
                     LastName = "Admin",
                     UserName = "admin@localhost.com",
                     NormalizedUserName = "ADMIN@LOCALHOST.COM",
-                    PasswordHash = hasher.HashPassword(null, "AdminPassword123!"),
-                    EmailConfirmed = true
+                    PasswordHash = "AQAAAAIAAYagAAAAEDAPBazKxc/ro5Tj7kqTQaMskAAUMv4PT2Bn+Lu0tbd/5PSMre2axWPhiCOLgp7kbA==",
+                    EmailConfirmed = true,
+                    SecurityStamp = "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    ConcurrencyStamp = "a1b2c3d4-e5f6-7890-abcd-ef1234567891"
                 },
                 new ApplicationUser
                 {
@@ -32,8 +31,10 @@ namespace HR.LeaveManagement.Identity.Configurations
                     LastName = "Doe",
                     UserName = "john.doe@localhost.com",
                     NormalizedUserName = "JOHN.DOE@LOCALHOST.COM",
-                    PasswordHash = hasher.HashPassword(null, "JohnDoePassword123!"),
-                    EmailConfirmed = true
+                    PasswordHash = "AQAAAAIAAYagAAAAEICbmZyvU0eRhWd6JLqb0/XER3OsSKN/Qri/eVWRfsJvGV5eSI3UcpvrxeU5BCKzBg==",
+                    EmailConfirmed = true,
+                    SecurityStamp = "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                    ConcurrencyStamp = "b2c3d4e5-f6a7-8901-bcde-f12345678902"
                 },
                 new ApplicationUser
                 {
@@ -44,8 +45,10 @@ namespace HR.LeaveManagement.Identity.Configurations
                     LastName = "Smith",
                     UserName = "jane.smith@localhost.com",
                     NormalizedUserName = "JANE.SMITH@LOCALHOST.COM",
-                    PasswordHash = hasher.HashPassword(null, "JaneSmithPassword123!"),
-                    EmailConfirmed = true
+                    PasswordHash = "AQAAAAIAAYagAAAAECWgdMFEwZRh5VV0TGmZ2vDeE2UmciQieURubqlFwzHpkfwPHx9xdtdtEA6+gLIt3g==",
+                    EmailConfirmed = true,
+                    SecurityStamp = "c3d4e5f6-a7b8-9012-cdef-123456789012",
+                    ConcurrencyStamp = "c3d4e5f6-a7b8-9012-cdef-123456789013"
                 }
             );
         }

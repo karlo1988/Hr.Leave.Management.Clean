@@ -15,12 +15,12 @@ namespace HR.LeaveManagement.Identity
 {
     public static class IdentityServicesRegistration
     {
-        public static IServiceCollection ConfigureIdentityServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
             services.AddDbContext<IdentityDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("HrDatabaseConnectionString")));
+                options.UseNpgsql(configuration.GetConnectionString("HrDatabaseConnectionString")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityDbContext>()
