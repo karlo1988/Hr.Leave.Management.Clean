@@ -1,14 +1,17 @@
 using System.Linq;
 using System.Text.Json;
+using Blazored.LocalStorage;
 
 namespace HR.LeaveManagement.BlazorUI.Services.Base
 {
     public class BaseHttpService
     {
         protected IClient _client;
-        public BaseHttpService(IClient client)
+        protected readonly ILocalStorageService _localStorage;
+        public BaseHttpService(IClient client, ILocalStorageService localStorage)
         {
             _client = client;
+            _localStorage = localStorage;
         }
 
         protected Response<Guid> ConvertApiExceptions<Guid>(ApiException exception)
