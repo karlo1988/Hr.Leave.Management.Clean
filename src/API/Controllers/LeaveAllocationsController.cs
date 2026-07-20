@@ -4,12 +4,14 @@ using HR.Leave.Management.Application.Features.LeaveAllocation.Commands.UpdateLe
 using HR.Leave.Management.Application.Features.LeaveAllocation.Queries.GetAllLeaveAllocations;
 using HR.Leave.Management.Application.Features.LeaveAllocation.Queries.GetLeaveAllocationDetails;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LeaveAllocationsController : ControllerBase
     {
         private readonly IMediator _mediator;

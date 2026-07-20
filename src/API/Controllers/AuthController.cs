@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HR.Leave.Management.Application.Contracts.Identity;
 using HR.Leave.Management.Application.Models.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
@@ -24,12 +26,14 @@ namespace API.Controllers
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponse>> Login([FromBody] AuthRequest request)
         {
             return Ok(await _authService.LoginAsync(request));
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponse>> Register([FromBody] RegistrationRequest request)
         {
