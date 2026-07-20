@@ -37,7 +37,7 @@ namespace HR.LeaveManagement.BlazorUI.Services.Base
                 }
                 catch { }
 
-               return new Response<Guid>
+                return new Response<Guid>
                 {
                     Success = false,
                     Message = "Invalid data was submitted",
@@ -49,7 +49,7 @@ namespace HR.LeaveManagement.BlazorUI.Services.Base
                 return new Response<Guid>
                 {
                     Success = false,
-                    Message ="The record was not found"
+                    Message = "The record was not found"
                 };
             }
             else
@@ -57,9 +57,17 @@ namespace HR.LeaveManagement.BlazorUI.Services.Base
                 return new Response<Guid>
                 {
                     Success = false,
-                    Message ="Something went wrong, please try again later"
+                    Message = "Something went wrong, please try again later"
                 };
             }
+        }
+
+        protected async Task AddBearerToken()
+        {
+            if (await _localStorage.ContainKeyAsync("token"))
+                _client.HttpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
+                        await _localStorage.GetItemAsync<string>("token"));
         }
     }
 }

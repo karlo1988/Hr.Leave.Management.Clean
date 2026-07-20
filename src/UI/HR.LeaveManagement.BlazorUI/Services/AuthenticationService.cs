@@ -5,40 +5,45 @@ using System.Threading.Tasks;
 using HR.LeaveManagement.BlazorUI.Contracts;
 using HR.LeaveManagement.BlazorUI.Services.Base;
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using HR.LeaveManagement.BlazorUI.Providers;
 
 namespace HR.LeaveManagement.BlazorUI.Services
 {
     public class AuthenticationService : BaseHttpService, IAuthenticationService
     {
-        public AuthenticationService(IClient client, ILocalStorageService localStorage) : base(client, localStorage) {}
-        
+        private readonly AuthenticationStateProvider _authenticationStateProvider;
+        public AuthenticationService(IClient client,
+            ILocalStorageService localStorage,
+            AuthenticationStateProvider authenticationStateProvider) : base(client, localStorage)
+        {
+            _authenticationStateProvider = authenticationStateProvider;
+        }
+
         public async Task<bool> AuthenticateAsync(string email, string password)
         {
             try
             {
-                
-            
-            AuthRequest request = new AuthRequest
-            {
-                Email = email,
-                Password = password
-            };
+                AuthRequest request = new AuthRequest
+                {
+                    Email = email,
+                    Password = password
+                };
 
-            AuthResponse response = await  _client.LoginAsync(request);
+                AuthResponse response = await _client.LoginAsync(request);
 
-            if(!string.IsNullOrEmpty(response.Token))
-            {
-                await _localStorage.SetItemAsync("token", response.Token);
-                //_client.HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", response.Token);
+                if (!string.IsNullOrEmpty(response.Token))
+                {
+                    await _localStorage.SetItemAsync("token", response.Token);
+                    //Set claims for Blazor and login state
+                    await ((ApiAuthenticationStateProvider)_authenticationStateProvider).LoggedIn();
 
-                //Set claims for Blazor and login state
+                    return true;
+                }
 
-                return true;
+                return false;
             }
-
-            return false;
-            }
-            catch 
+            catch
             {
 
                 //Some login methods
@@ -48,9 +53,8 @@ namespace HR.LeaveManagement.BlazorUI.Services
 
         public async Task LogoutAsync()
         {
-            await _localStorage.RemoveItemAsync("token");
-
-            //Remove claims for Blazor and invalidate login state 
+            //Remove claims for Blazor and invalidate login state
+            await ((ApiAuthenticationStateProvider)_authenticationStateProvider).LoggedOut();
         }
 
         public async Task<bool> RegisterAsync(string firstName, string lastName, string username, string email, string password)

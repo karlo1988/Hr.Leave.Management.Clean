@@ -22,6 +22,7 @@ namespace HR.LeaveManagement.BlazorUI.Services
             try
             {
             var createLeaveTypeCommand = _mapper.Map<CreateLeaveTypeCommand>(leaveType);
+            await AddBearerToken();
             await _client.LeaveTypesPOSTAsync(createLeaveTypeCommand);
 
             return new Response<Guid>() { Success = true };
@@ -36,6 +37,7 @@ namespace HR.LeaveManagement.BlazorUI.Services
         {
             try
             {
+                await AddBearerToken();
                 await _client.LeaveTypesDELETEAsync(id);
                 return new Response<Guid>() { Success = true };
             }
@@ -47,12 +49,14 @@ namespace HR.LeaveManagement.BlazorUI.Services
 
         public async Task<LeaveTypeVM> GetLeaveTypeDetails(int id)
         {
+            await AddBearerToken();
             var leaveType = await _client.LeaveTypesGETAsync(id);
             return _mapper.Map<LeaveTypeVM>(leaveType);
         }
 
         public async Task<List<LeaveTypeVM>> GetLeaveTypes()
         {
+            await AddBearerToken();
             var leaveTypes = await _client.LeaveTypesAllAsync();
             return _mapper.Map<List<LeaveTypeVM>>(leaveTypes);
         }
@@ -62,6 +66,7 @@ namespace HR.LeaveManagement.BlazorUI.Services
             try
             {
                 var updateLeaveTypeCommand = _mapper.Map<UpdateLeaveTypeCommand>(leaveType);
+                await AddBearerToken();
                 await _client.LeaveTypesPUTAsync(id, updateLeaveTypeCommand);
                 return new Response<Guid>() { Success = true };
             }
