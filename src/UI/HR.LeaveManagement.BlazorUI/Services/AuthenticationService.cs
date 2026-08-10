@@ -72,12 +72,10 @@ namespace HR.LeaveManagement.BlazorUI.Services
 
                 var response = await _client.RegisterAsync(request);
 
-                if (response.Id != null)
-                {
-                    return true;
-                }
-
-                return false;
+                // The API's register endpoint answers with a RegistrationResponse ({ userId }) even
+                // though the generated client types it as AuthResponse, so Id is never populated.
+                // Any failure surfaces as an ApiException, so a response at all means we are registered.
+                return response != null;
             }
             catch
             {

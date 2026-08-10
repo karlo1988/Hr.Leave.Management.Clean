@@ -20,6 +20,7 @@ builder.Services.AddHttpClient<IClient, Client>(client => client.BaseAddress = n
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ILeaveRequestService, LeaveRequestService>();

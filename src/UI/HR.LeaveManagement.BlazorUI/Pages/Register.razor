@@ -1,0 +1,49 @@
+@page "/register"
+
+<PageTitle>Register</PageTitle>
+
+<h3>Register</h3>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-danger">@Message</div>
+}
+
+<EditForm Model="RegisterModel" OnValidSubmit="HandleRegistration">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="RegisterModel.FirstName" />
+        <ValidationMessage For="@(() => RegisterModel.FirstName)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="RegisterModel.LastName" />
+        <ValidationMessage For="@(() => RegisterModel.LastName)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">User Name</label>
+        <InputText class="form-control" @bind-Value="RegisterModel.UserName" />
+        <ValidationMessage For="@(() => RegisterModel.UserName)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="RegisterModel.Email" />
+        <ValidationMessage For="@(() => RegisterModel.Email)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText type="password" class="form-control" @bind-Value="RegisterModel.Password" />
+        <ValidationMessage For="@(() => RegisterModel.Password)" />
+    </div>
+
+    <div class="m-2 d-flex justify-content-end gap-2">
+        <a href="/login" class="btn btn-secondary">Back to Login</a>
+        <button type="submit" class="btn btn-primary" disabled="@IsBusy">Register</button>
+    </div>
+</EditForm>
