@@ -34,7 +34,9 @@ namespace HR.LeaveManagement.BlazorUI.Providers
             var savedToken = await _localStorage.GetItemAsync<string>("token");
             var tokenContent = _tokenHandler.ReadJwtToken(savedToken);
 
-            if (tokenContent.ValidTo < DateTime.Now)
+            // JwtSecurityToken.ValidTo is UTC; comparing it to DateTime.Now (local) treats
+            // the token as expired by the machine's UTC offset, wiping a still-valid token.
+            if (tokenContent.ValidTo < DateTime.UtcNow)
             {
                 await _localStorage.RemoveItemAsync("token");
                 return new AuthenticationState(user);

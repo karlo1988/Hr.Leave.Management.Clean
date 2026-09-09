@@ -33,6 +33,11 @@ builder.Services.AddOpenApi(options =>
 
 var app = builder.Build();
 
+// CORS must run before anything that can short-circuit the request
+// (exception handler, HTTPS redirect) so error/redirect responses still
+// carry the Access-Control-* headers.
+app.UseCors("AllowAll");
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
@@ -42,9 +47,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
-
-app.UseCors("AllowAll");
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
