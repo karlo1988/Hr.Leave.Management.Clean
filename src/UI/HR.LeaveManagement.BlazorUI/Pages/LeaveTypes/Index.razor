@@ -34,10 +34,15 @@ else
                     <td>@leaveType.Name</td>
                     <td>@leaveType.DefaultDays</td>
                     <td>
-                        <button class="btn btn-sm btn-warning" @onclick="() => AllocateLeaveType(leaveType.Id)">Allocate</button>
-                        <button class="btn btn-sm btn-secondary" @onclick="() => NavigateToEdit(leaveType.Id)">Edit</button>
-                        <button class="btn btn-sm btn-info" @onclick="() => NavigateToDetails(leaveType.Id)">Details</button>                        
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteLeaveType(leaveType.Id)">Delete</button>
+                        <button class="btn btn-sm btn-warning"
+                                @onclick="() => AllocateLeaveType(leaveType.Id)">Allocate</button>
+                        <AuthorizeView Roles="Administrator">
+
+                            <button class="btn btn-sm btn-secondary" @onclick="() => NavigateToEdit(leaveType.Id)">Edit</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteLeaveType(leaveType.Id)">Delete</button>
+
+                        </AuthorizeView>
+                        <button class="btn btn-sm btn-info" @onclick="() => NavigateToDetails(leaveType.Id)">Details</button>
                     </td>
                 </tr>
             }

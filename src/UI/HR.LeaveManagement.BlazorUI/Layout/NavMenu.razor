@@ -18,6 +18,11 @@
         
         <AuthorizeView>
             <Authorized>
+                 <div class="nav-item px-3">
+                    <NavLink class="nav-link">
+                        <span class="io io-person" aria-hidden="true"></span> @context.User?.Identity?.Name
+                    </NavLink>
+                </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="leavetypes/">
                         <span class="bi bi-card-list-nav-menu" aria-hidden="true"></span> Leave Types
