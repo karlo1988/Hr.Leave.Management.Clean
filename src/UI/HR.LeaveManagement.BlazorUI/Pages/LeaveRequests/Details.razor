@@ -1,0 +1,61 @@
+@page "/leaverequests/details/{id:int}"
+@attribute [Authorize]
+
+<h3>Leave Request Details</h3>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-danger">@Message</div>
+}
+
+@if (LeaveRequest == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label class="form-label fw-bold">Leave Type</label>
+        <p class="form-control-plaintext">@LeaveRequest.LeaveType?.Name</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Start Date</label>
+        <p class="form-control-plaintext">@LeaveRequest.StartDate?.ToShortDateString()</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">End Date</label>
+        <p class="form-control-plaintext">@LeaveRequest.EndDate?.ToShortDateString()</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Date Requested</label>
+        <p class="form-control-plaintext">@LeaveRequest.DateRequested.ToShortDateString()</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Comments</label>
+        <p class="form-control-plaintext">@LeaveRequest.RequestComments</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Status</label>
+        <p class="form-control-plaintext">@LeaveRequest.Status</p>
+    </div>
+
+    <div class="m-2 d-flex justify-content-end gap-2">
+        <a href="/leaverequests" class="btn btn-secondary">Back</a>
+        <AuthorizeView Roles="Administrator">
+            @if (LeaveRequest.Approved == null && !LeaveRequest.Cancelled)
+            {
+                <button class="btn btn-success" @onclick="() => ChangeApproval(true)">Approve</button>
+                <button class="btn btn-outline-danger" @onclick="() => ChangeApproval(false)">Reject</button>
+            }
+        </AuthorizeView>
+        @if (LeaveRequest.Approved == null && !LeaveRequest.Cancelled)
+        {
+            <a href="/leaverequests/edit/@LeaveRequest.Id" class="btn btn-primary">Edit</a>
+        }
+    </div>
+}

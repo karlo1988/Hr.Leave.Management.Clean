@@ -1,0 +1,66 @@
+@page "/leaverequests/"
+@attribute [Authorize]
+
+<h3>Leave Requests</h3>
+
+<div class="m-2 d-flex justify-content-end">
+    <button class="btn btn-primary" @onclick="NavigateToCreate">Create Leave Request</button>
+</div>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-danger">@Message</div>
+}
+
+@if (LeaveRequests == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!LeaveRequests.Any())
+{
+    <p><em>No leave requests found.</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Leave Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Date Requested</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leaveRequest in LeaveRequests)
+            {
+                <tr>
+                    <td>@leaveRequest.Id</td>
+                    <td>@leaveRequest.LeaveType?.Name</td>
+                    <td>@leaveRequest.StartDate?.ToShortDateString()</td>
+                    <td>@leaveRequest.EndDate?.ToShortDateString()</td>
+                    <td>@leaveRequest.DateRequested.ToShortDateString()</td>
+                    <td><span class="badge @GetStatusCssClass(leaveRequest)">@leaveRequest.Status</span></td>
+                    <td>
+                        <AuthorizeView Roles="Administrator">
+                            @if (leaveRequest.Approved == null && !leaveRequest.Cancelled)
+                            {
+                                <button class="btn btn-sm btn-success" @onclick="() => ChangeApproval(leaveRequest.Id, true)">Approve</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ChangeApproval(leaveRequest.Id, false)">Reject</button>
+                            }
+                        </AuthorizeView>
+                        @if (leaveRequest.Approved == null && !leaveRequest.Cancelled)
+                        {
+                            <button class="btn btn-sm btn-secondary" @onclick="() => NavigateToEdit(leaveRequest.Id)">Edit</button>
+                        }
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteLeaveRequest(leaveRequest.Id)">Delete</button>
+                        <button class="btn btn-sm btn-info" @onclick="() => NavigateToDetails(leaveRequest.Id)">Details</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

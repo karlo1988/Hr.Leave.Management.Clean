@@ -12,7 +12,22 @@ namespace HR.LeaveManagement.BlazorUI.Services
     {
         public LeaveAllocationService(IClient client, ILocalStorageService localStorage) : base(client, localStorage)
         {
-            
+
+        }
+
+        public async Task<Response<Guid>> CreateLeaveAllocations(int leaveTypeId)
+        {
+            try
+            {
+                var command = new CreateLeaveAllocationCommand { LeaveTypeId = leaveTypeId };
+                await AddBearerToken();
+                await _client.LeaveAllocationsPOSTAsync(command);
+                return new Response<Guid>() { Success = true };
+            }
+            catch (ApiException ex)
+            {
+                return ConvertApiExceptions<Guid>(ex);
+            }
         }
     }
 }

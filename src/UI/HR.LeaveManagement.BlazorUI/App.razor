@@ -2,11 +2,17 @@
     <Router AppAssembly="@typeof(App).Assembly" >
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                @* AuthorizeRouteView already renders this inside DefaultLayout, so no LayoutView here *@
                 <NotAuthorized>
-                    <PageTitle>Not Authorized</PageTitle>
-                    <LayoutView Layout="@typeof(MainLayout)">
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        <RedirectToLogin />
+                    }
+                    else
+                    {
+                        <PageTitle>Not Authorized</PageTitle>
                         <p>You are not authorized to access this resource.</p>
-                    </LayoutView>
+                    }
                 </NotAuthorized>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />

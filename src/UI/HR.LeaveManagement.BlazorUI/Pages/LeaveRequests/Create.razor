@@ -1,0 +1,55 @@
+@page "/leaverequests/create"
+@attribute [Authorize]
+
+<h3>Create Leave Request</h3>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-danger">@Message</div>
+}
+
+@if (LeaveTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="LeaveRequest" OnValidSubmit="CreateLeaveRequest">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label class="form-label">Leave Type</label>
+            <InputSelect class="form-select" @bind-Value="LeaveRequest.LeaveTypeId">
+                <option value="0">-- Select Leave Type --</option>
+                @foreach (var leaveType in LeaveTypes)
+                {
+                    <option value="@leaveType.Id">@leaveType.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => LeaveRequest.LeaveTypeId)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Start Date</label>
+            <InputDate class="form-control" @bind-Value="LeaveRequest.StartDate" />
+            <ValidationMessage For="@(() => LeaveRequest.StartDate)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">End Date</label>
+            <InputDate class="form-control" @bind-Value="LeaveRequest.EndDate" />
+            <ValidationMessage For="@(() => LeaveRequest.EndDate)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Comments</label>
+            <InputTextArea class="form-control" rows="3" @bind-Value="LeaveRequest.RequestComments" />
+            <ValidationMessage For="@(() => LeaveRequest.RequestComments)" />
+        </div>
+
+        <div class="m-2 d-flex justify-content-end gap-2">
+            <a href="/leaverequests" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Leave Request</button>
+        </div>
+    </EditForm>
+}

@@ -10,5 +10,6 @@ namespace HR.Leave.Management.Application.Contracts.Identity
     {
         Task<List<Employee>> GetEmployees();
         Task<Employee> GetEmployee(string userId);
+        string UserId { get; }
     }
 }

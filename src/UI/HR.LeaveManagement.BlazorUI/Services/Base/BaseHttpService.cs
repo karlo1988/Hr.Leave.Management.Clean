@@ -40,7 +40,10 @@ namespace HR.LeaveManagement.BlazorUI.Services.Base
                 return new Response<Guid>
                 {
                     Success = false,
-                    Message = "Invalid data was submitted",
+                    // Business rule errors (e.g. not enough leave days) come without field errors, only a title
+                    Message = string.IsNullOrEmpty(validationErrors)
+                        ? exception.GetErrorMessage()
+                        : "Invalid data was submitted",
                     ValidationErrors = validationErrors
                 };
             }

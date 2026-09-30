@@ -26,6 +26,7 @@ namespace HR.LeaveManagement.Identity
                 .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddHttpContextAccessor();
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IUserService, UserService>();
 

@@ -3,6 +3,7 @@ using HR.Leave.Management.Application.Contracts.Email;
 using HR.Leave.Management.Application.Contracts.Logging;
 using HR.Leave.Management.Application.Contracts.Persistence;
 using HR.Leave.Management.Application.Exceptions;
+using HR.Leave.Management.Application.Features.LeaveRequest.Common;
 using HR.Leave.Management.Application.Models.Email;
 using MediatR;
 
@@ -15,14 +16,16 @@ public class UpdateLeaveRequestCommandHandler : IRequestHandler<UpdateLeaveReque
     private readonly ILeaveTypeRepository _leaveTypeRepository;
     private readonly IAppLogger<UpdateLeaveRequestCommandHandler> _logger;
     private readonly IEmailSender _emailSender;
+    private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
     public UpdateLeaveRequestCommandHandler(IMapper mapper, ILeaveRequestRepository leaveRequestRepository,
         ILeaveTypeRepository leaveTypeRepository, IAppLogger<UpdateLeaveRequestCommandHandler> logger,
-        IEmailSender emailSender)
+        IEmailSender emailSender, ILeaveAllocationRepository leaveAllocationRepository)
     {
         _mapper = mapper;
         _leaveRequestRepository = leaveRequestRepository;
         _leaveTypeRepository = leaveTypeRepository;
+        _leaveAllocationRepository = leaveAllocationRepository;
         _logger = logger;
         _emailSender = emailSender;
     }
@@ -44,6 +47,17 @@ public class UpdateLeaveRequestCommandHandler : IRequestHandler<UpdateLeaveReque
             _logger.LogWarning("Leave request with id {0} was not found.", request.Id);
             throw new NotFoundException(nameof(Domain.LeaveRequest), request.Id);
         }
+
+        // Approved requests have already been deducted from the allocation, so they can no longer change
+        if (existingLeaveRequest.Approved != null || existingLeaveRequest.Cancelled)
+            throw new BadRequestException("Only pending leave requests can be changed.");
+
+        // The request stays with the employee who created it
+        request.RequestingEmployeeId = existingLeaveRequest.RequestingEmployeeId;
+
+        var balanceChecker = new LeaveBalanceChecker(_leaveAllocationRepository, _leaveRequestRepository);
+        await balanceChecker.EnsureEnoughDays(request.RequestingEmployeeId, request.LeaveTypeId,
+            request.StartDate, request.EndDate, excludedLeaveRequestId: request.Id);
 
         _mapper.Map(request, existingLeaveRequest);
         await _leaveRequestRepository.UpdateAsync(existingLeaveRequest);

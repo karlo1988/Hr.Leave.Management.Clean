@@ -61,6 +61,8 @@ namespace HR.LeaveManagement.Application.UnitTests.Mocks
 
             // Arrange
             mockRepo.Setup(repo => repo.GetLeaveRequestsWithDetails()).ReturnsAsync(leaveRequests);
+            mockRepo.Setup(repo => repo.GetLeaveRequestsWithDetails(It.IsAny<string>()))
+                .ReturnsAsync((string userId) => leaveRequests.Where(lr => lr.RequestingEmployeeId == userId).ToList());
             mockRepo.Setup(repo => repo.GetLeaveRequestWithDetails(It.IsAny<int>())).ReturnsAsync((int id) =>
             {
                 return leaveRequests.First(lr => lr.Id == id);

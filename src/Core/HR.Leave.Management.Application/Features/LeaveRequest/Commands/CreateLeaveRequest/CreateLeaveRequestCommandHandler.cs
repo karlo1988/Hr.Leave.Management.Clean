@@ -1,8 +1,10 @@
 using AutoMapper;
 using HR.Leave.Management.Application.Contracts.Email;
+using HR.Leave.Management.Application.Contracts.Identity;
 using HR.Leave.Management.Application.Contracts.Logging;
 using HR.Leave.Management.Application.Contracts.Persistence;
 using HR.Leave.Management.Application.Exceptions;
+using HR.Leave.Management.Application.Features.LeaveRequest.Common;
 using HR.Leave.Management.Application.Models.Email;
 using MediatR;
 
@@ -15,20 +17,27 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
     private readonly ILeaveTypeRepository _leaveTypeRepository;
     private readonly IAppLogger<CreateLeaveRequestCommandHandler> _logger;
     private readonly IEmailSender _emailSender;
+    private readonly IUserService _userService;
+    private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
     public CreateLeaveRequestCommandHandler(IMapper mapper, ILeaveRequestRepository leaveRequestRepository,
         ILeaveTypeRepository leaveTypeRepository, IAppLogger<CreateLeaveRequestCommandHandler> logger,
-        IEmailSender emailSender)
+        IEmailSender emailSender, IUserService userService, ILeaveAllocationRepository leaveAllocationRepository)
     {
         _mapper = mapper;
         _leaveRequestRepository = leaveRequestRepository;
         _leaveTypeRepository = leaveTypeRepository;
+        _leaveAllocationRepository = leaveAllocationRepository;
         _logger = logger;
         _emailSender = emailSender;
+        _userService = userService;
     }
 
     public async Task<int> Handle(CreateLeaveRequestCommand request, CancellationToken cancellationToken)
     {
+        // Leave requests are always created for the logged in user, whatever the client sent
+        request.RequestingEmployeeId = _userService.UserId;
+
         var validator = new CreateLeaveRequestCommandValidator(_leaveTypeRepository);
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -37,6 +46,10 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
             _logger.LogWarning("Validation errors in CreateLeaveRequestCommand: {0}", validationResult.Errors);
             throw new BadRequestException("Invalid LeaveRequest", validationResult);
         }
+
+        var balanceChecker = new LeaveBalanceChecker(_leaveAllocationRepository, _leaveRequestRepository);
+        await balanceChecker.EnsureEnoughDays(request.RequestingEmployeeId, request.LeaveTypeId,
+            request.StartDate, request.EndDate);
 
         var leaveRequestToCreate = _mapper.Map<Domain.LeaveRequest>(request);
         leaveRequestToCreate.DateRequested = DateTime.UtcNow;

@@ -39,12 +39,14 @@ namespace API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Post([FromBody] CreateLeaveAllocationCommand command)
         {
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(Get), new { id }, new { Id = id });
+            // Allocates the leave type to every employee, so there is no single resource to point to
+            var allocationsCreated = await _mediator.Send(command);
+            return StatusCode(StatusCodes.Status201Created, new { AllocationsCreated = allocationsCreated });
         }
 
         [HttpPut("{id}")]

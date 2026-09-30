@@ -2,6 +2,7 @@ using HR.Leave.Management.Application.Contracts.Email;
 using HR.Leave.Management.Application.Contracts.Logging;
 using HR.Leave.Management.Application.Contracts.Persistence;
 using HR.Leave.Management.Application.Exceptions;
+using HR.Leave.Management.Application.Features.LeaveRequest.Common;
 using HR.Leave.Management.Application.Models.Email;
 using MediatR;
 
@@ -12,11 +13,14 @@ public class ChangeLeaveRequestApprovalCommandHandler : IRequestHandler<ChangeLe
     private readonly ILeaveRequestRepository _leaveRequestRepository;
     private readonly IAppLogger<ChangeLeaveRequestApprovalCommandHandler> _logger;
     private readonly IEmailSender _emailSender;
+    private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
     public ChangeLeaveRequestApprovalCommandHandler(ILeaveRequestRepository leaveRequestRepository,
-        IAppLogger<ChangeLeaveRequestApprovalCommandHandler> logger, IEmailSender emailSender)
+        IAppLogger<ChangeLeaveRequestApprovalCommandHandler> logger, IEmailSender emailSender,
+        ILeaveAllocationRepository leaveAllocationRepository)
     {
         _leaveRequestRepository = leaveRequestRepository;
+        _leaveAllocationRepository = leaveAllocationRepository;
         _logger = logger;
         _emailSender = emailSender;
     }
@@ -37,6 +41,35 @@ public class ChangeLeaveRequestApprovalCommandHandler : IRequestHandler<ChangeLe
         {
             _logger.LogWarning("Leave request with id {0} was not found.", request.Id);
             throw new NotFoundException(nameof(Domain.LeaveRequest), request.Id);
+        }
+
+        if (leaveRequest.Cancelled)
+            throw new BadRequestException("A cancelled leave request cannot be approved or rejected.");
+
+        var wasApproved = leaveRequest.Approved == true;
+        var isApproved = request.Approved == true;
+        if (wasApproved != isApproved)
+        {
+            var allocation = await _leaveAllocationRepository.GetUserAllocations(leaveRequest.RequestingEmployeeId,
+                leaveRequest.LeaveTypeId, leaveRequest.StartDate.Year);
+            if (allocation == null)
+                throw new BadRequestException("The employee does not have an allocation for this leave type.");
+
+            var days = LeaveBalanceChecker.CountDays(leaveRequest.StartDate, leaveRequest.EndDate);
+            if (isApproved)
+            {
+                if (days > allocation.NumberOfDays)
+                    throw new BadRequestException(
+                        $"The employee does not have enough days: requested {days}, remaining {allocation.NumberOfDays}.");
+                allocation.NumberOfDays -= days;
+            }
+            else
+            {
+                // A previously approved request is being rejected, so give the days back
+                allocation.NumberOfDays += days;
+            }
+
+            await _leaveAllocationRepository.UpdateAsync(allocation);
         }
 
         leaveRequest.Approved = request.Approved;
