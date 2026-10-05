@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using HR.Leave.Management.Application.Contracts.Identity;
 using HR.Leave.Management.Application.Contracts.Logging;
 using HR.Leave.Management.Application.Contracts.Persistence;
 using HR.Leave.Management.Application.Features.LeaveRequest.Queries.GetAllLeaveRequests;
@@ -39,7 +40,10 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Querie
         public async Task GetLeaveRequestsListTest()
         {
             // Arrange
-            var handler = new GetLeaveRequestsQueryHandler(_mockRepo.Object, _mapper, _mockAppLogger.Object);
+            var mockUserService = new Mock<IUserService>();
+            mockUserService.Setup(u => u.IsAdministrator).Returns(true);
+            var handler = new GetLeaveRequestsQueryHandler(_mockRepo.Object, _mapper, _mockAppLogger.Object,
+                mockUserService.Object);
 
             // Act
             var result = await handler.Handle(new GetLeaveRequestsQuery(), CancellationToken.None);
@@ -48,6 +52,23 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Querie
             result.ShouldNotBeNull();
             result.ShouldBeOfType<List<LeaveRequestDto>>();
             result.Count.ShouldBe(3);
+        }
+
+        [Fact]
+        public async Task Handle_Employee_ReturnsOnlyOwnLeaveRequests()
+        {
+            // Arrange
+            var mockUserService = new Mock<IUserService>();
+            mockUserService.Setup(u => u.UserId).Returns("2");
+            var handler = new GetLeaveRequestsQueryHandler(_mockRepo.Object, _mapper, _mockAppLogger.Object,
+                mockUserService.Object);
+
+            // Act
+            var result = await handler.Handle(new GetLeaveRequestsQuery(), CancellationToken.None);
+
+            // Assert
+            result.Count.ShouldBe(1);
+            result[0].RequestingEmployeeId.ShouldBe("2");
         }
     }
 }

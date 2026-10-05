@@ -38,6 +38,10 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
         // Leave requests are always created for the logged in user, whatever the client sent
         request.RequestingEmployeeId = _userService.UserId;
 
+        // Dates sent with an offset are deserialized as Kind=Local, which PostgreSQL's timestamptz rejects
+        request.StartDate = request.StartDate.ToUniversalTime();
+        request.EndDate = request.EndDate.ToUniversalTime();
+
         var validator = new CreateLeaveRequestCommandValidator(_leaveTypeRepository);
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 

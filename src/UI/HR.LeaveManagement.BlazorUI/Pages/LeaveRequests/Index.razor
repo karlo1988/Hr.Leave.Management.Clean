@@ -3,9 +3,43 @@
 
 <h3>Leave Requests</h3>
 
-<div class="m-2 d-flex justify-content-end">
-    <button class="btn btn-primary" @onclick="NavigateToCreate">Create Leave Request</button>
-</div>
+<AuthorizeView Roles="Employee">
+    <div class="m-2 d-flex justify-content-end">
+        <button class="btn btn-primary" @onclick="NavigateToCreate">Create Leave Request</button>
+    </div>
+</AuthorizeView>
+
+<AuthorizeView Roles="Administrator">
+    @if (LeaveRequests != null)
+    {
+        <div class="row g-3 my-2">
+            <div class="col-md-4">
+                <div class="card text-white bg-success text-center">
+                    <div class="card-body">
+                        <h2 class="card-title">@ApprovedCount</h2>
+                        <p class="card-text">Approved</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-danger text-center">
+                    <div class="card-body">
+                        <h2 class="card-title">@RejectedCount</h2>
+                        <p class="card-text">Rejected</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-dark bg-warning text-center">
+                    <div class="card-body">
+                        <h2 class="card-title">@PendingCount</h2>
+                        <p class="card-text">Pending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</AuthorizeView>
 
 @if (!string.IsNullOrEmpty(Message))
 {
@@ -45,18 +79,13 @@ else
                     <td>@leaveRequest.DateRequested.ToShortDateString()</td>
                     <td><span class="badge @GetStatusCssClass(leaveRequest)">@leaveRequest.Status</span></td>
                     <td>
-                        <AuthorizeView Roles="Administrator">
+                        <AuthorizeView Roles="Employee">
                             @if (leaveRequest.Approved == null && !leaveRequest.Cancelled)
                             {
-                                <button class="btn btn-sm btn-success" @onclick="() => ChangeApproval(leaveRequest.Id, true)">Approve</button>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ChangeApproval(leaveRequest.Id, false)">Reject</button>
+                                <button class="btn btn-sm btn-secondary" @onclick="() => NavigateToEdit(leaveRequest.Id)">Edit</button>
                             }
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteLeaveRequest(leaveRequest.Id)">Delete</button>
                         </AuthorizeView>
-                        @if (leaveRequest.Approved == null && !leaveRequest.Cancelled)
-                        {
-                            <button class="btn btn-sm btn-secondary" @onclick="() => NavigateToEdit(leaveRequest.Id)">Edit</button>
-                        }
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteLeaveRequest(leaveRequest.Id)">Delete</button>
                         <button class="btn btn-sm btn-info" @onclick="() => NavigateToDetails(leaveRequest.Id)">Details</button>
                     </td>
                 </tr>

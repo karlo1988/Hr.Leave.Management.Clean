@@ -24,6 +24,8 @@ namespace HR.LeaveManagement.Identity.Services
         // "uid" is the claim AuthService puts the user's Id in when generating the JWT
         public string UserId => _httpContextAccessor.HttpContext?.User?.FindFirst("uid")?.Value ?? string.Empty;
 
+        public bool IsAdministrator => _httpContextAccessor.HttpContext?.User?.IsInRole("Administrator") ?? false;
+
         public async Task<Employee> GetEmployee(string userId)
         {
             var emaployee = await _userManager.FindByIdAsync(userId);

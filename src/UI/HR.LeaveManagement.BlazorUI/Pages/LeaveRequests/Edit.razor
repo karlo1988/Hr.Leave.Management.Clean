@@ -1,5 +1,5 @@
 @page "/leaverequests/edit/{id:int}"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Employee")]
 
 <h3>Edit Leave Request</h3>
 

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using HR.Leave.Management.Application.Contracts.Identity;
 using HR.Leave.Management.Application.Contracts.Persistence;
+using HR.Leave.Management.Application.Exceptions;
 using HR.Leave.Management.Application.Features.LeaveRequest.Queries.GetLeaveRequestDetails;
 using HR.Leave.Management.Application.MappingProfiles;
 using HR.LeaveManagement.Application.UnitTests.Mocks;
@@ -35,7 +37,9 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Querie
         public async Task Handle_ValidRequest_ReturnsLeaveRequestDetails()
         {
             // Arrange
-            var handler = new GetLeaveRequestDetailsQueryHandler(_mockRepo.Object, _mapper);
+            var mockUserService = new Mock<IUserService>();
+            mockUserService.Setup(u => u.UserId).Returns("1");
+            var handler = new GetLeaveRequestDetailsQueryHandler(_mockRepo.Object, _mapper, mockUserService.Object);
             var query = new GetLeaveRequestDetailsQuery { Id = 1 };
 
             // Act
@@ -44,6 +48,19 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Querie
             // Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
+        }
+
+        [Fact]
+        public async Task Handle_OtherEmployeesRequest_ThrowsNotFoundException()
+        {
+            // Arrange
+            var mockUserService = new Mock<IUserService>();
+            mockUserService.Setup(u => u.UserId).Returns("2");
+            var handler = new GetLeaveRequestDetailsQueryHandler(_mockRepo.Object, _mapper, mockUserService.Object);
+            var query = new GetLeaveRequestDetailsQuery { Id = 1 };
+
+            // Act & Assert
+            await Assert.ThrowsAsync<NotFoundException>(() => handler.Handle(query, CancellationToken.None));
         }
     }
 }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using HR.Leave.Management.Application.Contracts.Email;
+using HR.Leave.Management.Application.Contracts.Identity;
 using HR.Leave.Management.Application.Contracts.Logging;
 using HR.Leave.Management.Application.Contracts.Persistence;
 using HR.Leave.Management.Application.Exceptions;
@@ -17,11 +18,13 @@ public class UpdateLeaveRequestCommandHandler : IRequestHandler<UpdateLeaveReque
     private readonly IAppLogger<UpdateLeaveRequestCommandHandler> _logger;
     private readonly IEmailSender _emailSender;
     private readonly ILeaveAllocationRepository _leaveAllocationRepository;
+    private readonly IUserService _userService;
 
     public UpdateLeaveRequestCommandHandler(IMapper mapper, ILeaveRequestRepository leaveRequestRepository,
         ILeaveTypeRepository leaveTypeRepository, IAppLogger<UpdateLeaveRequestCommandHandler> logger,
-        IEmailSender emailSender, ILeaveAllocationRepository leaveAllocationRepository)
+        IEmailSender emailSender, ILeaveAllocationRepository leaveAllocationRepository, IUserService userService)
     {
+        _userService = userService;
         _mapper = mapper;
         _leaveRequestRepository = leaveRequestRepository;
         _leaveTypeRepository = leaveTypeRepository;
@@ -32,6 +35,10 @@ public class UpdateLeaveRequestCommandHandler : IRequestHandler<UpdateLeaveReque
 
     public async Task<Unit> Handle(UpdateLeaveRequestCommand request, CancellationToken cancellationToken)
     {
+        // Dates sent with an offset are deserialized as Kind=Local, which PostgreSQL's timestamptz rejects
+        request.StartDate = request.StartDate.ToUniversalTime();
+        request.EndDate = request.EndDate.ToUniversalTime();
+
         var validator = new UpdateLeaveRequestCommandValidator(_leaveTypeRepository, _leaveRequestRepository);
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -42,7 +49,8 @@ public class UpdateLeaveRequestCommandHandler : IRequestHandler<UpdateLeaveReque
         }
 
         var existingLeaveRequest = await _leaveRequestRepository.GetByIdAsync(request.Id);
-        if (existingLeaveRequest == null)
+        // Only the employee who created the request may change it
+        if (existingLeaveRequest == null || existingLeaveRequest.RequestingEmployeeId != _userService.UserId)
         {
             _logger.LogWarning("Leave request with id {0} was not found.", request.Id);
             throw new NotFoundException(nameof(Domain.LeaveRequest), request.Id);

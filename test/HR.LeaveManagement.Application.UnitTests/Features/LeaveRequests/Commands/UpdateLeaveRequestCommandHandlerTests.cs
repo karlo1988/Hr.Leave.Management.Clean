@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using HR.Leave.Management.Application.Contracts.Email;
+using HR.Leave.Management.Application.Contracts.Identity;
 using HR.Leave.Management.Application.Contracts.Logging;
 using HR.Leave.Management.Application.Contracts.Persistence;
 using HR.Leave.Management.Application.Exceptions;
@@ -24,6 +25,7 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Comman
         private readonly Mock<IAppLogger<UpdateLeaveRequestCommandHandler>> _mockLogger;
         private readonly Mock<IEmailSender> _mockEmailSender;
         private readonly Mock<ILeaveAllocationRepository> _mockAllocationRepo;
+        private readonly Mock<IUserService> _mockUserService;
         private readonly IMapper _mapper;
 
         public UpdateLeaveRequestCommandHandlerTests()
@@ -33,6 +35,9 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Comman
             _mockLogger = new Mock<IAppLogger<UpdateLeaveRequestCommandHandler>>();
             _mockEmailSender = new Mock<IEmailSender>();
             _mockAllocationRepo = new Mock<ILeaveAllocationRepository>();
+            // Request 1 in the mock repository belongs to employee "1"
+            _mockUserService = new Mock<IUserService>();
+            _mockUserService.Setup(u => u.UserId).Returns("1");
             SetupAllocation(20);
 
             _mockEmailSender.Setup(e => e.SendEmail(It.IsAny<Leave.Management.Application.Models.Email.EmailMessage>()))
@@ -62,7 +67,7 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Comman
             };
 
             var handler = new UpdateLeaveRequestCommandHandler(
-                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object);
+                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object, _mockUserService.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -86,7 +91,7 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Comman
             };
 
             var handler = new UpdateLeaveRequestCommandHandler(
-                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object);
+                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object, _mockUserService.Object);
 
             // Act
             await handler.Handle(command, CancellationToken.None);
@@ -109,7 +114,7 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Comman
             };
 
             var handler = new UpdateLeaveRequestCommandHandler(
-                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object);
+                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object, _mockUserService.Object);
 
             // Act & Assert
             await Should.ThrowAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
@@ -129,7 +134,7 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Comman
             };
 
             var handler = new UpdateLeaveRequestCommandHandler(
-                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object);
+                _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object, _mockAllocationRepo.Object, _mockUserService.Object);
 
             // Act & Assert
             await Should.ThrowAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
@@ -227,7 +232,27 @@ namespace HR.LeaveManagement.Application.UnitTests.Features.LeaveRequests.Comman
 
         private UpdateLeaveRequestCommandHandler CreateHandler() => new UpdateLeaveRequestCommandHandler(
             _mapper, _mockRepo.Object, _mockLeaveTypeRepo.Object, _mockLogger.Object, _mockEmailSender.Object,
-            _mockAllocationRepo.Object);
+            _mockAllocationRepo.Object, _mockUserService.Object);
+
+        [Fact]
+        public async Task Handle_OtherEmployeesRequest_ThrowsNotFoundException()
+        {
+            // Arrange - request 2 belongs to employee "2"
+            var command = new UpdateLeaveRequestCommand
+            {
+                Id = 2,
+                StartDate = DateTime.Now.AddDays(10),
+                EndDate = DateTime.Now.AddDays(12),
+                LeaveTypeId = 1,
+                RequestingEmployeeId = "1"
+            };
+
+            var handler = CreateHandler();
+
+            // Act & Assert
+            await Should.ThrowAsync<NotFoundException>(() => handler.Handle(command, CancellationToken.None));
+            _mockRepo.Verify(r => r.UpdateAsync(It.IsAny<Leave.Management.Domain.LeaveRequest>()), Times.Never);
+        }
 
         private void SetupAllocation(int numberOfDays)
         {

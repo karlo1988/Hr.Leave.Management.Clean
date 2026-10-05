@@ -15,6 +15,18 @@ namespace HR.LeaveManagement.BlazorUI.Pages.LeaveRequests
         public LeaveRequestVM LeaveRequest { get; set; }
         public string Message { get; set; } = string.Empty;
 
+        // Bootstrap colour for the current status: approved, rejected, cancelled or pending
+        public string StatusColor => LeaveRequest?.Status switch
+        {
+            "Approved" => "success",
+            "Rejected" => "danger",
+            "Cancelled" => "secondary",
+            _ => "warning"
+        };
+
+        // Yellow needs dark text to stay readable
+        public string StatusTextCssClass => StatusColor == "warning" ? "text-dark" : "text-white";
+
         public async Task ChangeApproval(bool approved)
         {
             var response = await LeaveRequestService.ChangeApproval(Id, approved);

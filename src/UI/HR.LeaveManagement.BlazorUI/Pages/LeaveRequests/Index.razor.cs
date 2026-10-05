@@ -44,19 +44,9 @@ namespace HR.LeaveManagement.BlazorUI.Pages.LeaveRequests
             }
         }
 
-        public async Task ChangeApproval(int id, bool approved)
-        {
-            var response = await LeaveRequestService.ChangeApproval(id, approved);
-            if (response.Success)
-            {
-                LeaveRequests = await LeaveRequestService.GetLeaveRequests();
-                StateHasChanged();
-            }
-            else
-            {
-                Message = $"Error changing approval: {response.Message} {response.ValidationErrors}";
-            }
-        }
+        public int ApprovedCount => LeaveRequests.Count(q => q.Status == "Approved");
+        public int RejectedCount => LeaveRequests.Count(q => q.Status == "Rejected");
+        public int PendingCount => LeaveRequests.Count(q => q.Status == "Pending");
 
         public static string GetStatusCssClass(LeaveRequestVM leaveRequest) => leaveRequest.Status switch
         {

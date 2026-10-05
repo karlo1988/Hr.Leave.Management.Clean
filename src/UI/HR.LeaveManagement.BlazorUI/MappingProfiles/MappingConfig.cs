@@ -16,8 +16,9 @@ namespace HR.LeaveManagement.BlazorUI.MappingProfiles
             // The generated client uses DateTimeOffset while the view models use DateTime
             CreateMap<DateTimeOffset, DateTime>().ConvertUsing(d => d.DateTime);
             CreateMap<DateTimeOffset, DateTime?>().ConvertUsing(d => d.DateTime);
-            CreateMap<DateTime, DateTimeOffset>().ConvertUsing(d => new DateTimeOffset(d));
-            CreateMap<DateTime?, DateTimeOffset>().ConvertUsing(d => new DateTimeOffset(d ?? default));
+            // Picked dates are sent as UTC so the calendar day does not shift with the browser's time zone
+            CreateMap<DateTime, DateTimeOffset>().ConvertUsing(d => new DateTimeOffset(DateTime.SpecifyKind(d, DateTimeKind.Utc)));
+            CreateMap<DateTime?, DateTimeOffset>().ConvertUsing(d => new DateTimeOffset(DateTime.SpecifyKind(d ?? default, DateTimeKind.Utc)));
 
             CreateMap<LeaveTypeDto, LeaveTypeVM>().ReverseMap();
             CreateMap<GetLeaveTypeDetailsDto, LeaveTypeVM>().ReverseMap();

@@ -1,7 +1,7 @@
 @page "/leaverequests/details/{id:int}"
 @attribute [Authorize]
 
-<h3>Leave Request Details</h3>
+<PageTitle>Leave Request Details</PageTitle>
 
 @if (!string.IsNullOrEmpty(Message))
 {
@@ -14,48 +14,59 @@
 }
 else
 {
-    <div class="mb-3">
-        <label class="form-label fw-bold">Leave Type</label>
-        <p class="form-control-plaintext">@LeaveRequest.LeaveType?.Name</p>
-    </div>
+    <div class="card shadow-sm border-@StatusColor mx-auto" style="max-width: 720px;">
+        <div class="card-header bg-@StatusColor @StatusTextCssClass py-3">
+            <h3 class="mb-2">Leave Request Details</h3>
+            <span class="badge bg-light text-@StatusColor fs-6">@LeaveRequest.Status</span>
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label fw-bold">Start Date</label>
-        <p class="form-control-plaintext">@LeaveRequest.StartDate?.ToShortDateString()</p>
-    </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-sm-6">
+                    <div class="text-muted small text-uppercase">Leave Type</div>
+                    <div class="fs-5">@LeaveRequest.LeaveType?.Name</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-muted small text-uppercase">Date Requested</div>
+                    <div class="fs-5">@LeaveRequest.DateRequested.ToShortDateString()</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-muted small text-uppercase">Start Date</div>
+                    <div class="fs-5">@LeaveRequest.StartDate?.ToShortDateString()</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-muted small text-uppercase">End Date</div>
+                    <div class="fs-5">@LeaveRequest.EndDate?.ToShortDateString()</div>
+                </div>
+                <div class="col-12">
+                    <div class="text-muted small text-uppercase">Comments</div>
+                    @if (string.IsNullOrWhiteSpace(LeaveRequest.RequestComments))
+                    {
+                        <div class="text-muted fst-italic">No comments</div>
+                    }
+                    else
+                    {
+                        <div class="p-3 bg-light rounded">@LeaveRequest.RequestComments</div>
+                    }
+                </div>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label fw-bold">End Date</label>
-        <p class="form-control-plaintext">@LeaveRequest.EndDate?.ToShortDateString()</p>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-bold">Date Requested</label>
-        <p class="form-control-plaintext">@LeaveRequest.DateRequested.ToShortDateString()</p>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-bold">Comments</label>
-        <p class="form-control-plaintext">@LeaveRequest.RequestComments</p>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-bold">Status</label>
-        <p class="form-control-plaintext">@LeaveRequest.Status</p>
-    </div>
-
-    <div class="m-2 d-flex justify-content-end gap-2">
-        <a href="/leaverequests" class="btn btn-secondary">Back</a>
-        <AuthorizeView Roles="Administrator">
-            @if (LeaveRequest.Approved == null && !LeaveRequest.Cancelled)
-            {
-                <button class="btn btn-success" @onclick="() => ChangeApproval(true)">Approve</button>
-                <button class="btn btn-outline-danger" @onclick="() => ChangeApproval(false)">Reject</button>
-            }
-        </AuthorizeView>
-        @if (LeaveRequest.Approved == null && !LeaveRequest.Cancelled)
-        {
-            <a href="/leaverequests/edit/@LeaveRequest.Id" class="btn btn-primary">Edit</a>
-        }
+        <div class="card-footer bg-transparent d-flex justify-content-end gap-2">
+            <a href="/leaverequests" class="btn btn-secondary">Back</a>
+            <AuthorizeView Roles="Administrator">
+                @if (LeaveRequest.Approved == null && !LeaveRequest.Cancelled)
+                {
+                    <button class="btn btn-success" @onclick="() => ChangeApproval(true)">Approve</button>
+                    <button class="btn btn-outline-danger" @onclick="() => ChangeApproval(false)">Reject</button>
+                }
+            </AuthorizeView>
+            <AuthorizeView Roles="Employee">
+                @if (LeaveRequest.Approved == null && !LeaveRequest.Cancelled)
+                {
+                    <a href="/leaverequests/edit/@LeaveRequest.Id" class="btn btn-primary">Edit</a>
+                }
+            </AuthorizeView>
+        </div>
     </div>
 }
