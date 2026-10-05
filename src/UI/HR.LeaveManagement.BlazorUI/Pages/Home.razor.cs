@@ -25,16 +25,6 @@ namespace HR.LeaveManagement.BlazorUI.Pages
              await ((ApiAuthenticationStateProvider) AuthenticationStateProvider).GetAuthenticationStateAsync();
         }
 
-        protected void GoToLogin()
-        {
-            NavigationManager.NavigateTo("login/");
-        }
-
-         protected void GoToRegister()
-        {
-            NavigationManager.NavigateTo("register/");
-        }
-
         protected async Task Logout()
         {
             await AuthenticationService.LogoutAsync();
