@@ -4,8 +4,15 @@ using HR.Leave.Management.Infrastructure;
 using HR.Leave.Management.Persistence;
 using HR.LeaveManagement.Identity;
 using Scalar.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) => 
+    configuration.WriteTo.Console()
+    .ReadFrom.Configuration(context.Configuration)
+    );
+
 
 // Add services to the container.
 builder.Services.AddApplicationServices();
@@ -36,6 +43,8 @@ var app = builder.Build();
 // CORS must run before anything that can short-circuit the request
 // (exception handler, HTTPS redirect) so error/redirect responses still
 // carry the Access-Control-* headers.
+app.UseSerilogRequestLogging();
+
 app.UseCors("AllowAll");
 
 app.UseMiddleware<ExceptionMiddleware>();
