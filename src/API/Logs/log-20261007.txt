@@ -1,0 +1,17 @@
+[2026-10-07 15:03:47 INF] Now listening on: https://localhost:7086
+[2026-10-07 15:03:47 INF] Now listening on: http://localhost:5110
+[2026-10-07 15:03:47 INF] Application started. Press Ctrl+C to shut down.
+[2026-10-07 15:03:47 INF] Hosting environment: Development
+[2026-10-07 15:03:47 INF] Content root path: D:\Personal\Udemy Courses\ASP.NET Core - SOLID and Clean Architecture\Projects\HR.Leave.Management.Clean\src\API
+[2026-10-07 15:04:42 INF] HTTP OPTIONS /api/LeaveRequests responded 204 in 4.8203 ms
+[2026-10-07 15:04:42 WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+[2026-10-07 15:04:42 WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+[2026-10-07 15:04:43 INF] Leave requests were successfully retrieved from the database.
+[2026-10-07 15:04:43 INF] HTTP GET /api/LeaveRequests responded 200 in 1296.1864 ms
+[2026-10-07 15:04:44 INF] HTTP OPTIONS /api/LeaveTypes responded 204 in 0.4785 ms
+[2026-10-07 15:04:44 INF] Leave types were successfully retrieved from the database.
+[2026-10-07 15:04:44 INF] HTTP GET /api/LeaveTypes responded 200 in 43.6268 ms
+[2026-10-07 15:04:46 INF] HTTP OPTIONS /api/LeaveTypes/1 responded 204 in 0.1092 ms
+[2026-10-07 15:04:46 INF] HTTP GET /api/LeaveTypes/1 responded 200 in 112.5813 ms
+[2026-10-07 15:04:47 INF] Leave types were successfully retrieved from the database.
+[2026-10-07 15:04:47 INF] HTTP GET /api/LeaveTypes responded 200 in 4.7009 ms
